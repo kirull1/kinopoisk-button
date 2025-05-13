@@ -5,7 +5,10 @@
   "description": "Adds a Test button to Kinopoisk film pages",
   "content_scripts": [
     {
-      "matches": ["*://*.kinopoisk.ru/film/*"],
+      "matches": [
+        "*://*.kinopoisk.ru/film/*", 
+        "*://*.kinopoisk.ru/series/*"
+      ],
       "js": ["content.js"],
       "run_at": "document_end"
     }
