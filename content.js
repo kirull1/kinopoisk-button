@@ -51,7 +51,7 @@ function addButton(domain, buttonContent) {
 }
 
 function getPageTypeAndId() {
-  const match = window.location.pathname.match(/\/(film|series)\/(?:.*)?(\d+)/);
+  const match = window.location.pathname.match(/\/(film|series)\/(?:.*?-)?(\d+)/);
   if (!match) return null;
   return { type: match[1], id: match[2] };
 }
