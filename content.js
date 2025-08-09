@@ -1,6 +1,7 @@
 console.log("Kinopoisk Button: Content script loaded");
 
 let isInitialized = false;
+let maxTryCount = 3;
 
 function initializeButton() {
   chrome.storage.sync.get({ customDomain: "kirull.ru", buttonContent: "Смотреть" }, function (items) {
@@ -14,12 +15,22 @@ function initializeButton() {
 function addButton(domain, buttonContent) {
   const pageType = getPageTypeAndId();
 
-  if (!pageType) {
+  let id = pageType?.id;
+  let type = pageType?.type;
+
+  if (!type || !id) {
+    const hasOuterId = getCurrentFilmId();
+    
+    console.log("Kinopoisk Button: Outer ID found, using it as the ID");
+    id = hasOuterId;
+    type = "film";
+  }
+
+  if (!id) {
     console.log("Kinopoisk Button: Unsupported page or invalid ID");
     return;
   }
 
-  const { type, id } = pageType;
   const targetUrl = `https://${domain}/${type}/${id}/`;
   console.log("Kinopoisk Button: Target URL:", targetUrl);
 
@@ -48,6 +59,19 @@ function addButton(domain, buttonContent) {
   console.log("Kinopoisk Button: Button added");
 
   isInitialized = true;
+}
+
+function getCurrentFilmId() {
+  const filmData = document.getElementById("__NEXT_DATA__").textContent;
+  const parseData = JSON.parse(filmData);
+
+  const movieKey = Object.keys(parseData.props.pageProps.apolloState.data)
+  .find(k => k.startsWith('__Movie:'));
+  const id = parseData.props.pageProps.apolloState.data[movieKey]?.id;
+  
+  console.log("Kinopoisk ID:", id);
+
+  return isNaN(id) ? null : id;
 }
 
 function getPageTypeAndId() {
@@ -106,7 +130,7 @@ async function main() {
   
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
-  if (!isInitialized) {
+  if (!isInitialized && --maxTryCount > 0) {
     await main();
   }
 }
