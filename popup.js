@@ -1,10 +1,15 @@
+const DOMAIN = 'kirull.ru';
+const BUTTON_CONTENT = "Смотреть";
+
 function saveOptions() {
   const domain = document.getElementById('domain').value.trim();
+  const buttonContent = document.getElementById('buttonContent').value.trim();
   
-  const domainToSave = domain || 'kirull.ru';
+  const domainToSave = domain || DOMAIN;
+  const buttonContentToSave = buttonContent || BUTTON_CONTENT;
   
   chrome.storage.sync.set(
-    { customDomain: domainToSave },
+    { customDomain: domainToSave, buttonContent: buttonContentToSave },
     function() {
       const status = document.getElementById('status');
       status.textContent = 'Settings saved.';
@@ -26,9 +31,10 @@ function saveOptions() {
 
 function restoreOptions() {
   chrome.storage.sync.get(
-    { customDomain: 'kirull.ru' },
+    { customDomain: DOMAIN, buttonContent: BUTTON_CONTENT },
     function(items) {
       document.getElementById('domain').value = items.customDomain;
+      document.getElementById('buttonContent').value = items.buttonContent;
     }
   );
 }

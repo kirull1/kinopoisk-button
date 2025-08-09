@@ -1,18 +1,17 @@
 console.log("Kinopoisk Button: Content script loaded");
 
-const BUTTON_CONTENT = "Смотреть :)";
-
 let isInitialized = false;
 
 function initializeButton() {
-  chrome.storage.sync.get({ customDomain: "kirull.ru" }, function (items) {
+  chrome.storage.sync.get({ customDomain: "kirull.ru", buttonContent: "Смотреть" }, function (items) {
     const customDomain = items.customDomain;
-    console.log("Kinopoisk Button: Using domain:", customDomain);
-    addButton(customDomain);
+    const customButton = items.buttonContent;
+    console.log("Kinopoisk Button:", customDomain, customButton);
+    addButton(customDomain, customButton);
   });
 }
 
-function addButton(domain) {
+function addButton(domain, buttonContent) {
   const pageType = getPageTypeAndId();
 
   if (!pageType) {
@@ -34,7 +33,7 @@ function addButton(domain) {
 
   if (!watchButton) {
     console.log('Kinopoisk Button: Could not find the "Буду смотреть" button, using fallback position');
-    appendButtonFallback(targetUrl);
+    appendButtonFallback(targetUrl, buttonContent);
     return;
   }
 
@@ -44,7 +43,7 @@ function addButton(domain) {
     return;
   }
 
-  const button = createButton(targetUrl);
+  const button = createButton(targetUrl, buttonContent);
   buttonContainer.appendChild(button);
   console.log("Kinopoisk Button: Button added");
 
@@ -65,12 +64,12 @@ function getWatchButton() {
   );
 }
 
-function createButton(href) {
+function createButton(href, buttonContent) {
   const button = document.createElement("a");
   button.id = "kinopoisk-button";
   button.href = href;
   button.target = "_blank";
-  button.textContent = BUTTON_CONTENT;
+  button.textContent = buttonContent || "Смотреть";
 
   button.style.display = "inline-block";
   button.style.background = "var(--primary-gradient, linear-gradient(135deg, #f50 69.93%, #d6bb00 100%))";
@@ -91,8 +90,8 @@ function createButton(href) {
   return button;
 }
 
-function appendButtonFallback(href) {
-  const button = createButton(href);
+function appendButtonFallback(href, buttonContent) {
+  const button = createButton(href, buttonContent);
   button.style.position = "fixed";
   button.style.top = "100px";
   button.style.right = "20px";
