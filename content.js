@@ -2,6 +2,8 @@ console.log("Kinopoisk Button: Content script loaded");
 
 const BUTTON_CONTENT = "Смотреть :)";
 
+let isInitialized = false;
+
 function initializeButton() {
   chrome.storage.sync.get({ customDomain: "kirull.ru" }, function (items) {
     const customDomain = items.customDomain;
@@ -12,6 +14,7 @@ function initializeButton() {
 
 function addButton(domain) {
   const pageType = getPageTypeAndId();
+
   if (!pageType) {
     console.log("Kinopoisk Button: Unsupported page or invalid ID");
     return;
@@ -22,6 +25,7 @@ function addButton(domain) {
   console.log("Kinopoisk Button: Target URL:", targetUrl);
 
   if (document.querySelector("#kinopoisk-button")) {
+    isInitialized = true;
     console.log("Kinopoisk Button: Button already exists");
     return;
   }
@@ -43,10 +47,12 @@ function addButton(domain) {
   const button = createButton(targetUrl);
   buttonContainer.appendChild(button);
   console.log("Kinopoisk Button: Button added");
+
+  isInitialized = true;
 }
 
 function getPageTypeAndId() {
-  const match = window.location.pathname.match(/\/(film|series)\/(?:.*?-)?(\d+)/);
+  const match = window.location.pathname.match(/\/(film|series)\/(?:.*)?(\d+)/);
   if (!match) return null;
   return { type: match[1], id: match[2] };
 }
@@ -54,7 +60,8 @@ function getPageTypeAndId() {
 function getWatchButton() {
   return (
     document.querySelector('[data-test-id="Watch"]') ||
-    document.querySelector('button[title="Буду смотреть"]')
+    document.querySelector('button[title="Буду смотреть"]') ||
+    document.querySelector('[data-tid="ContentActionsTransition"]')
   );
 }
 
@@ -95,11 +102,17 @@ function appendButtonFallback(href) {
   console.log("Kinopoisk Button: Button added to page (fallback position)");
 }
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initializeButton);
-} else {
+async function main() {
   initializeButton();
+  
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  if (!isInitialized) {
+    await main();
+  }
 }
 
-setTimeout(initializeButton, 1000);
-setTimeout(initializeButton, 3000);
+(async () => {
+  await new Promise((resolve) => setTimeout(resolve, 1500));
+  await main();
+})();
