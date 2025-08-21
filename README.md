@@ -1,6 +1,6 @@
 # Kinopoisk Button Extension
 
-A Chrome extension that adds the custome button on Kinopoisk film pages.
+A Chrome extension that adds the custome button on Kinopoisk film and series pages.
 
 ## Installation
 
@@ -21,6 +21,6 @@ A Chrome extension that adds the custome button on Kinopoisk film pages.
 ## Troubleshooting
 
 If the button doesn't appear:
-- Make sure you're on a Kinopoisk film page (URL contains "/film/")
+- Make sure you're on a right page (URL contains "/film/" or "/series/")
 - Try refreshing the page
 - Check the browser console (F12) for any error messages
